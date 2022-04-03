@@ -173,7 +173,11 @@ module.exports.Menu = class extends EventEmitter {
    * Start a reaction collector and switch pages where required.
    */
   awaitReactions () {
-    this.reactionCollector = this.menu.createReactionCollector((reaction, user) => user.id !== this.menu.client.user.id, { idle: this.ms })
+    const filter = (reaction, user) => {
+      return user.id !== this.menu.client.user.id
+    }
+  
+    this.reactionCollector = this.menu.createReactionCollector({ filter, idle: this.ms })
 
     let sameReactions
     this.reactionCollector.on('end', (reactions) => {
@@ -203,22 +207,22 @@ module.exports.Menu = class extends EventEmitter {
 
         switch (this.currentPage.reactions[reactionName]) {
           case 'first':
-            sameReactions = JSON.stringify(this.menu.reactions.cache.keyArray()) === JSON.stringify(Object.keys(this.pages[0].reactions))
+            sameReactions = JSON.stringify([...this.menu.reactions.cache.keys()]) === JSON.stringify(Object.keys(this.pages[0].reactions))
             this.setPage(0)
             break
           case 'last':
-            sameReactions = JSON.stringify(this.menu.reactions.cache.keyArray()) === JSON.stringify(Object.keys(this.pages[this.pages.length - 1].reactions))
+            sameReactions = JSON.stringify([...this.menu.reactions.cache.keys()]) === JSON.stringify(Object.keys(this.pages[this.pages.length - 1].reactions))
             this.setPage(this.pages.length - 1)
             break
           case 'previous':
             if (this.pageIndex > 0) {
-              sameReactions = JSON.stringify(this.menu.reactions.cache.keyArray()) === JSON.stringify(Object.keys(this.pages[this.pageIndex - 1].reactions))
+              sameReactions = JSON.stringify([...this.menu.reactions.cache.keys()]) === JSON.stringify(Object.keys(this.pages[this.pageIndex - 1].reactions))
               this.setPage(this.pageIndex - 1)
             }
             break
           case 'next':
             if (this.pageIndex < this.pages.length - 1) {
-              sameReactions = JSON.stringify(this.menu.reactions.cache.keyArray()) === JSON.stringify(Object.keys(this.pages[this.pageIndex + 1].reactions))
+              sameReactions = JSON.stringify([...this.menu.reactions.cache.keys()]) === JSON.stringify(Object.keys(this.pages[this.pageIndex + 1].reactions))
               this.setPage(this.pageIndex + 1)
             }
             break
@@ -229,7 +233,7 @@ module.exports.Menu = class extends EventEmitter {
             this.delete()
             break
           default:
-            sameReactions = JSON.stringify(this.menu.reactions.cache.keyArray()) === JSON.stringify(Object.keys(this.pages.find(p => p.name === this.currentPage.reactions[reactionName]).reactions))
+            sameReactions = JSON.stringify([...this.menu.reactions.cache.keys()]) === JSON.stringify(Object.keys(this.pages.find(p => p.name === this.currentPage.reactions[reactionName]).reactions))
             this.setPage(this.pages.findIndex(p => p.name === this.currentPage.reactions[reactionName]))
             break
         }
